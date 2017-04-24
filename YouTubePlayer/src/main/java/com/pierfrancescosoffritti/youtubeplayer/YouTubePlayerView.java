@@ -22,8 +22,9 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
 
     @NonNull private final YouTubePlayer youTubePlayer;
 
-    @NonNull private final View playerControls;
-    @NonNull private final PlayerControlsWrapper playerControlsWrapper;
+    private final boolean initControls = false;
+    private View playerControls;
+    private PlayerControlsWrapper playerControlsWrapper;
 
     @NonNull private final PlaybackResumer playbackResumer;
 
@@ -47,15 +48,18 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
         youTubePlayer = new YouTubePlayer(context);
         addView(youTubePlayer, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
-        playerControls = inflate(context, R.layout.player_controls, this);
-        playerControlsWrapper = new PlayerControlsWrapper(this, playerControls);
+        if (initControls) {
+            playerControls = inflate(context, R.layout.player_controls, this);
+            playerControlsWrapper = new PlayerControlsWrapper(this, playerControls);
+        }
 
         playbackResumer = new PlaybackResumer(this);
 
         fullScreenListeners = new HashSet<>();
-        fullScreenListeners.add(playerControlsWrapper);
-
-        youTubePlayer.addListener(playerControlsWrapper);
+        if (playerControlsWrapper != null) {
+            fullScreenListeners.add(playerControlsWrapper);
+            youTubePlayer.addListener(playerControlsWrapper);
+        }
         youTubePlayer.addListener(playbackResumer);
 
         networkReceiver = new NetworkReceiver(this);
@@ -75,7 +79,9 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
      * Set a custom behaviour to the full screen button.
      */
     public void onFullScreenButtonListener(OnClickListener listener) {
-        playerControlsWrapper.setOnFullScreenButtonListener(listener);
+        if (playerControlsWrapper != null) {
+            playerControlsWrapper.setOnFullScreenButtonListener(listener);
+        }
     }
 
     public boolean isFullScreen() {
@@ -127,6 +133,10 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
         return fullScreenListeners.remove(fullScreenListener);
     }
 
+    public void addYouTubeListener(YouTubePlayer.YouTubeListener listener) {
+        youTubePlayer.addListener(listener);
+    }
+
     // calls to YouTubePlayer
 
     private boolean initialized = false;
@@ -172,7 +182,9 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
         }
 
         youTubePlayer.loadVideo(videoId, startSecond);
-        playerControlsWrapper.onNewVideo();
+        if (playerControlsWrapper != null) {
+            playerControlsWrapper.onNewVideo();
+        }
     }
 
     /**
@@ -185,7 +197,9 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
         }
 
         youTubePlayer.cueVideo(videoId, startSeconds);
-        playerControlsWrapper.onNewVideo();
+        if (playerControlsWrapper != null) {
+            playerControlsWrapper.onNewVideo();
+        }
     }
 
     /**
@@ -256,22 +270,32 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
     }
 
     public void showTitle(boolean show) {
-        playerControlsWrapper.showTitle(show);
+        if (playerControlsWrapper != null) {
+            playerControlsWrapper.showTitle(show);
+        }
     }
 
     public void setCustomActionRight(Drawable icon, View.OnClickListener clickListener) {
-        playerControlsWrapper.setCustomActionRight(icon, clickListener);
+        if (playerControlsWrapper != null) {
+            playerControlsWrapper.setCustomActionRight(icon, clickListener);
+        }
     }
 
     public void setCustomActionLeft(Drawable icon, View.OnClickListener clickListener) {
-        playerControlsWrapper.setCustomActionLeft(icon, clickListener);
+        if (playerControlsWrapper != null) {
+            playerControlsWrapper.setCustomActionLeft(icon, clickListener);
+        }
     }
 
     public void showFullScreenButton(boolean show) {
-        playerControlsWrapper.showFullscreenButton(show);
+        if (playerControlsWrapper != null) {
+            playerControlsWrapper.showFullscreenButton(show);
+        }
     }
 
     public void hideUI(boolean hide) {
-        playerControlsWrapper.hideUI(hide);
+        if (playerControlsWrapper != null) {
+            playerControlsWrapper.hideUI(hide);
+        }
     }
 }
