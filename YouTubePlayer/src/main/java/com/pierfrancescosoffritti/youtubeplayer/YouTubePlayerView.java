@@ -255,6 +255,24 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
         youTubePlayer.pause();
     }
 
+    public void mute() {
+        if(!initialized) {
+            Log.e("YouTubePlayerView", "the player has not been initialized");
+            return;
+        }
+
+        youTubePlayer.mute();
+    }
+
+    public void unMute() {
+        if(!initialized) {
+            Log.e("YouTubePlayerView", "the player has not been initialized");
+            return;
+        }
+
+        youTubePlayer.unMute();
+    }
+
     @Override
     public void onNetworkAvailable() {
         Log.d("YouTubePlayerView", "Network available.");
