@@ -211,6 +211,18 @@
             player.loadVideoById(videoId, startSeconds);
         }
 
+        function loadVideo(videoId, startSeconds, suggestedQuality) {
+        	console.log("[JS] Loading video: " +videoId + " - " + startSeconds + " - " + suggestedQuality);
+
+        	setLog("Loading video: " +videoId + " - " + startSeconds);
+
+            player.loadVideoById({
+    				'videoId': videoId,
+    				'startSeconds': startSeconds,
+    				'suggestedQuality': suggestedQuality
+    			});
+        }
+
         function cueVideo(videoId, startSeconds) {
         	console.log("[JS] Cue video: " +videoId + " - " + startSeconds);
             setLog("Cue video: " +videoId + " - " + startSeconds);

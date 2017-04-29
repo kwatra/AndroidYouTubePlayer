@@ -193,15 +193,15 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
     }
 
     /**
-     * See {@link YouTubePlayer#loadVideo(String, float)}
+     * See {@link YouTubePlayer#loadVideo(String, float, String)}
      */
-    public void loadVideo(String videoId, float startSecond) {
+    public void loadVideo(String videoId, float startSecond, String suggestedQuality) {
         if(!initialized) {
             Log.e(TAG, "loadVideo: the player has not been initialized");
             return;
         }
 
-        youTubePlayer.loadVideo(videoId, startSecond);
+        youTubePlayer.loadVideo(videoId, startSecond, suggestedQuality);
         if (playerControlsWrapper != null) {
             playerControlsWrapper.onNewVideo();
         }

@@ -98,12 +98,19 @@ public class YouTubePlayer extends WebView {
      * This function loads and plays the specified video.
      * @param videoId
      * @param startSeconds the time from which the video should start playing
+     * @param suggestedQuality can pass null to give no suggestion
      */
-    protected void loadVideo(final String videoId, final float startSeconds) {
+    protected void loadVideo(final String videoId, final float startSeconds,
+                             final String suggestedQuality) {
         mainThreadHandler.post(new Runnable() {
             @Override
             public void run() {
-                loadUrl("javascript:loadVideo('" +videoId +"', " +startSeconds +")");
+                if (suggestedQuality == null) {
+                    loadUrl("javascript:loadVideo('" +videoId +"', " +startSeconds +")");
+                } else {
+                    loadUrl("javascript:loadVideo('" + videoId + "', " + startSeconds + ", '" +
+                            suggestedQuality + "')");
+                }
             }
         });
     }

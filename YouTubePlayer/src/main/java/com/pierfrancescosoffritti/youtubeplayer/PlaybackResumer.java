@@ -16,7 +16,7 @@ public class PlaybackResumer implements YouTubePlayer.YouTubeListener {
 
     public void resume() {
         if(isPlaying && error == YouTubePlayer.Error.HTML_5_PLAYER)
-            youTubePlayerView.loadVideo(videoId, currentSecond);
+            youTubePlayerView.loadVideo(videoId, currentSecond, null  /*suggestedQuality*/);
         else if(!isPlaying && error == YouTubePlayer.Error.HTML_5_PLAYER)
             youTubePlayerView.cueVideo(videoId, currentSecond);
 
