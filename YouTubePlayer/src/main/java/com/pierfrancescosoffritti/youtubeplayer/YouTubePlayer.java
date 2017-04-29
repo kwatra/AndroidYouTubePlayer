@@ -180,6 +180,10 @@ public class YouTubePlayer extends WebView {
         return youTubeListeners.remove(listener);
     }
 
+    protected void clearListeners() {
+        youTubeListeners.clear();
+    }
+
     public interface YouTubeListener {
         void onReady();
         void onStateChange(@State.YouTubePlayerState int state);

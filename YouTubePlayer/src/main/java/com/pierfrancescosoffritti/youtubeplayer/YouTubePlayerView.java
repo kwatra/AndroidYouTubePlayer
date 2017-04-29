@@ -17,10 +17,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.NetworkListener {
+    private static final String TAG = "NKSG:YouTubePlayerView";
 
     @NonNull private final NetworkReceiver networkReceiver;
 
-    @NonNull private final YouTubePlayer youTubePlayer;
+    private YouTubePlayer youTubePlayer;
 
     private final boolean initControls = false;
     private View playerControls;
@@ -44,23 +45,19 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
         super(context, attrs, defStyleAttr);
 
         isFullScreen = false;
-
-        youTubePlayer = new YouTubePlayer(context);
-        addView(youTubePlayer, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-
         if (initControls) {
             playerControls = inflate(context, R.layout.player_controls, this);
             playerControlsWrapper = new PlayerControlsWrapper(this, playerControls);
         }
 
         playbackResumer = new PlaybackResumer(this);
+        //youTubePlayer.addListener(playbackResumer);
 
         fullScreenListeners = new HashSet<>();
         if (playerControlsWrapper != null) {
             fullScreenListeners.add(playerControlsWrapper);
             youTubePlayer.addListener(playerControlsWrapper);
         }
-        youTubePlayer.addListener(playbackResumer);
 
         networkReceiver = new NetworkReceiver(this);
     }
@@ -142,22 +139,45 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
     private boolean initialized = false;
     private Callable onNetworkAvailableCallback;
 
+    public void bind(@Nullable final YouTubePlayer.YouTubeListener youTubeListener) {
+        if (youTubePlayer == null) {
+            initializePlayer(youTubeListener, true  /*handleNetworkEvents*/);
+        } else {
+            youTubePlayer.clearListeners();
+            youTubePlayer.addListener(youTubeListener);
+        }
+    }
+
+    public void unbind() {
+        // TODO: NKSG: Release into a pool.
+        if (youTubePlayer == null) {
+            Log.e(TAG, "unbind: youTubePlayer null");
+        }
+        removeView(youTubePlayer);
+        youTubePlayer = null;
+        initialized = false;
+    }
+
     /**
      * Initialize the player
      * @param youTubeListener lister for player events
      * @param handleNetworkEvents if <b>true</b> a broadcast receiver will be registered.<br/>If <b>false</b> you should handle network events with your broadcast receiver. See {@link YouTubePlayerView#onNetworkAvailable()} and {@link YouTubePlayerView#onNetworkUnavailable()}
      */
-    public void initialize(@Nullable final YouTubePlayer.YouTubeListener youTubeListener, boolean handleNetworkEvents) {
+    private void initializePlayer(@Nullable final YouTubePlayer.YouTubeListener youTubeListener, boolean handleNetworkEvents) {
+        Log.v(TAG, "Initializing youtube player");
+        youTubePlayer = new YouTubePlayer(getContext());  // TODO: NKSG: Get from a pool.
+        addView(youTubePlayer, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
         if(handleNetworkEvents)
             getContext().registerReceiver(networkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
 
         if(!Utils.isOnline(getContext())) {
-            Log.e("YouTubePlayerView", "Can't initialize because device is not connected to the internet.");
+            Log.e(TAG, "Can't initialize because device is not connected to the internet.");
 
             onNetworkAvailableCallback = new Callable() {
                 @Override
                 public void call() {
-                    Log.d("YouTubePlayerView", "Network available. Initializing player.");
+                    Log.d(TAG, "Network available. Initializing player.");
                     youTubePlayer.initialize(youTubeListener);
                     initialized = true;
 
@@ -177,7 +197,7 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
      */
     public void loadVideo(String videoId, float startSecond) {
         if(!initialized) {
-            Log.e("YouTubePlayerView", "the player has not been initialized");
+            Log.e(TAG, "loadVideo: the player has not been initialized");
             return;
         }
 
@@ -192,7 +212,7 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
      */
     public void cueVideo(String videoId, float startSeconds) {
         if(!initialized) {
-            Log.e("YouTubePlayerView", "the player has not been initialized");
+            Log.e(TAG, "cueVideo: the player has not been initialized");
             return;
         }
 
@@ -208,7 +228,7 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
      */
     public void release() {
         if(!initialized) {
-            Log.e("YouTubePlayerView", "the player has not been initialized");
+            Log.e(TAG, "release: the player has not been initialized");
             return;
         }
 
@@ -224,7 +244,7 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
      */
     public void seekTo(int time) {
         if(!initialized) {
-            Log.e("YouTubePlayerView", "the player has not been initialized");
+            Log.e(TAG, "seekTo: the player has not been initialized");
             return;
         }
 
@@ -236,7 +256,7 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
      */
     public void playVideo() {
         if(!initialized) {
-            Log.e("YouTubePlayerView", "the player has not been initialized");
+            Log.e(TAG, "playVideo: the player has not been initialized");
             return;
         }
 
@@ -248,7 +268,7 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
      */
     public void pauseVideo() {
         if(!initialized) {
-            Log.e("YouTubePlayerView", "the player has not been initialized");
+            Log.e(TAG, "pauseVideo: the player has not been initialized");
             return;
         }
 
@@ -257,7 +277,7 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
 
     public void mute() {
         if(!initialized) {
-            Log.e("YouTubePlayerView", "the player has not been initialized");
+            Log.e(TAG, "mute: the player has not been initialized");
             return;
         }
 
@@ -266,7 +286,7 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
 
     public void unMute() {
         if(!initialized) {
-            Log.e("YouTubePlayerView", "the player has not been initialized");
+            Log.e(TAG, "unMute: the player has not been initialized");
             return;
         }
 
@@ -275,7 +295,7 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
 
     @Override
     public void onNetworkAvailable() {
-        Log.d("YouTubePlayerView", "Network available.");
+        Log.d(TAG, "Network available.");
         if(!initialized && onNetworkAvailableCallback != null)
             onNetworkAvailableCallback.call();
         else
