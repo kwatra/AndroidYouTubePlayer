@@ -21,6 +21,14 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
 
     @NonNull private final NetworkReceiver networkReceiver;
 
+    private static ItemPool<YouTubePlayer> sYouTubePlayerPool;
+    private static ItemPool<YouTubePlayer> getYouTubePlayerPool() {
+        if (sYouTubePlayerPool == null) {
+            sYouTubePlayerPool = new ItemPool<>();
+        }
+        return sYouTubePlayerPool;
+    }
+
     private YouTubePlayer youTubePlayer;
 
     private final boolean initControls = false;
@@ -149,11 +157,12 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
     }
 
     public void unbind() {
-        // TODO: NKSG: Release into a pool.
         if (youTubePlayer == null) {
             Log.e(TAG, "unbind: youTubePlayer null");
         }
+        Log.v(TAG, "Releasing youTubePlayer");
         removeView(youTubePlayer);
+        getYouTubePlayerPool().release(youTubePlayer);
         youTubePlayer = null;
         initialized = false;
     }
@@ -165,7 +174,14 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
      */
     private void initializePlayer(@Nullable final YouTubePlayer.YouTubeListener youTubeListener, boolean handleNetworkEvents) {
         Log.v(TAG, "Initializing youtube player");
-        youTubePlayer = new YouTubePlayer(getContext());  // TODO: NKSG: Get from a pool.
+        youTubePlayer = getYouTubePlayerPool().getFast();
+        if (youTubePlayer == null) {
+            Log.v(TAG, "youTubePlayer not found in pool. Creating new.");
+            youTubePlayer = new YouTubePlayer(getContext());
+            getYouTubePlayerPool().add(youTubePlayer);
+        } else {
+            Log.v(TAG, "youTubePlayer reusing from pool.");
+        }
         addView(youTubePlayer, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
         if(handleNetworkEvents)
