@@ -174,6 +174,7 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
      */
     private void initializePlayer(@Nullable final YouTubePlayer.YouTubeListener youTubeListener, boolean handleNetworkEvents) {
         Log.v(TAG, "Initializing youtube player");
+
         youTubePlayer = getYouTubePlayerPool().getFast();
         if (youTubePlayer == null) {
             Log.v(TAG, "youTubePlayer not found in pool. Creating new.");
@@ -181,6 +182,12 @@ public class YouTubePlayerView extends FrameLayout implements NetworkReceiver.Ne
             getYouTubePlayerPool().add(youTubePlayer);
         } else {
             Log.v(TAG, "youTubePlayer reusing from pool.");
+        }
+
+        ViewGroup existingParent = (ViewGroup) youTubePlayer.getParent();
+        if (existingParent != null) {
+            Log.e(TAG, "existingParent of youTubePlayer");
+            existingParent.removeView(youTubePlayer);
         }
         addView(youTubePlayer, new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
